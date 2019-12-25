@@ -9,12 +9,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 import time
+
+
+
 #사전에 필요한 정보를 로드 -> 디비혹스 쉘, 배ㅣ파일에서 인자로 받아서 세팅
 main_url = 'http://tour.interpark.com/'
 keyword = '로마'
 
 #드라이버
 driver = wd.Chrome(ChromeDriverManager().install())
+
 #차후 옵션부여하여 (프록시 , 에이전트 조작, 이미지를 배제)
 #크롤링을 오래돌리면 -> 임시파일들이 쌓인다 -> temp파일삭제
 
@@ -48,7 +52,7 @@ except Exception as e:
 #해외여행 더보기클릭
 driver.find_element_by_css_selector('body > div.container > div > div > div.panelZone > div.oTravelBox > ul > li.moreBtnWrap > button').click()
 #절대적대기 -> time.sleep(10) 10초간 무조건 기다림 ->클라우드페어(디도스방어 솔루션)
-
+print('here')
 #게시판에서 데이터를 가져올때
 #데이터가 많으면 세션(혹시 로그인을 해서 접근되는 사이트일 경우)관리
 #특정단위별 로그아웃 로그인 계속 시도
@@ -59,11 +63,28 @@ driver.find_element_by_css_selector('body > div.container > div > div > div.pane
 #스크립트 실행
 #onclick="searchModule.SetCategoryList(1, '')"
 #16은 임시값 게시물 넘어갔을때 현상 확인차
-for page in range(1, 16):
+for page in range(1, 1):
     try:
         #자바스크립트 구동하기
+        print('111')
         driver.execute_script("searchModule.SetCategoryList(%s, '')" %page)
+        print('222')
         time.sleep(2)
+        print('333')
         print("%s 페이지이동", page)
+
+        #####
+        #상품명 코멘트 기간1 기간2, 가격, 평점, 썸네일, 링크(실제상품 상세정보)
+        boxItems = driver.find_elements_by_xpath('/html/body/div[3]/div/div/div[5]/div[3]/ul/li')
+        
+        #li 하나 하나에 접근
+        for li in boxItems:
+            print('상품명', li.find_element_by_css_selector('h5.proTit').text)
+            print('코멘트', li.find_element_by_css_selector('p.proSub').text)
+            #print('기간1', li.find_element_by_css_selector('div > div.info-row > div:nth-child(1) > p:nth-child(1)').text)
+            #print('기간2', li.find_element_by_xpath('/div/div[3]/div[1]/p[2]').txt)
+            #/html/body/div[3]/div/div/div[5]/div[3]/ul/li[1]/div/div[3]/div[1]/p[1]            
+            #/html/body/div[3]/div/div/div[5]/div[3]/ul/li[1]/div/div[3]/div[1]/p[2]
+            #body > div.container > div > div > div.panelZone > div.recommService > div > ul > li > div > div.info-row > div:nth-child(1) > p:nth-child(1)
     except Exception as e1:
         print('오류', e1)

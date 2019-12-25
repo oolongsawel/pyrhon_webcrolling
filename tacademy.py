@@ -11,7 +11,7 @@ import time
 #tour.py로 부터 TourInfo class를 import
 from tour import TourInfo
 
-
+from bs4 import BeautifulSoup as bs
 
 #사전에 필요한 정보를 로드 -> 디비혹스 쉘, 배ㅣ파일에서 인자로 받아서 세팅
 main_url = 'http://tour.interpark.com/'
@@ -122,6 +122,13 @@ for tour in tour_list:
         #상세페이지 이동
         driver.get(detail_url)
         time.sleep(2)  
+
+        #상세페이지를 bs4 beatifulSoup의 DOM으로 구성
+        #driver.page_source() 현재페이지의 html (current page)
+        soup = bs(driver.page_source, 'html.parser') 
+        #상세정보페이지에서 1일차 스케쥴 정보획득
+        data = soup.select('.date-detail dayArea_1 j_scheduleDetail') #클래스이름
+        print( type(data) , len(data))
 
 #종료
 driver.close()        

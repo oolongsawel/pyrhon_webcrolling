@@ -7,14 +7,18 @@ from selenium.webdriver.common.by import By
 #명시적대기를위해
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
 import time
+#tour.py로 부터 TourInfo class를 import
+from tour import TourInfo
 
 
 
 #사전에 필요한 정보를 로드 -> 디비혹스 쉘, 배ㅣ파일에서 인자로 받아서 세팅
 main_url = 'http://tour.interpark.com/'
 keyword = '로마'
+
+#상품정보를 담는 리스트(TourInfo 객체담는 리스트)
+tour_list = []
 
 #드라이버
 driver = wd.Chrome(ChromeDriverManager().install())
@@ -59,6 +63,9 @@ driver.find_element_by_css_selector('body > div.container > div > div > div.pane
 #게시판 스캔시 -> 임계점을 모름!!
 #게시판 스캔 -> 메타정보 획득 -> loop돌려서 일괄적으로 방문
 
+#페이지 변경되어 다시 대기
+time.sleep(3)
+
 #스크립트 실행
 #onclick="searchModule.SetCategoryList(1, '')"
 #16은 임시값 게시물 넘어갔을때 현상 확인차
@@ -83,5 +90,41 @@ for page in range(1, 2):
             print('썸네일', li.find_element_by_css_selector('a > img').get_attribute('src'))
             print('링크_상세정보', li.find_element_by_css_selector('a').get_attribute('onclick'))
 
+            #데이터모음
+            obj = TourInfo(
+                li.find_element_by_css_selector('h5.proTit').text
+                ,li.find_element_by_css_selector('div > div.title-row > div:nth-child(2) > strong').text
+                ,li.find_element_by_css_selector('div > div.info-row > div:nth-child(1) > p:nth-child(2)').text
+                ,li.find_element_by_css_selector('a').get_attribute('onclick')
+                ,li.find_element_by_css_selector('a > img').get_attribute('src')
+            )
+            tour_list.append(obj)
+
     except Exception as e1:
         print('오류', e1)
+
+
+print(tour_list, len(tour_list))
+
+#수집한 정보 개수를 루프 -> 페이지방문 -> 콘텐츠획득(상품상세정보)->디비
+for tour in tour_list:
+    #tour -> TourInfo
+    print( type(tour))
+    #링크 데이터에서 실제데이터 획득
+    arr = tour.link.split(',')
+
+    #대체
+    if arr:
+        #대체
+        link = arr[0].replace('searchModule.OnClickDetail(','')
+        #슬라이싱 -> 앞뒤 ' 을 제거
+        detail_url = link[1:-1]
+        #상세페이지 이동
+        driver.get(detail_url)
+        time.sleep(2)  
+
+#종료
+driver.close()        
+driver.quit()
+import sys
+sys.exit()
